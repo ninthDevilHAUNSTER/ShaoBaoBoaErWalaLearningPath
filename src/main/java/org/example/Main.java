@@ -18,14 +18,15 @@ import com.ibm.wala.types.Selector;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 
 
 public class Main {
     public static void main(String[] args) {
-        buildCGFromJar();
+        learnIR();
     }
 
-    public static void buildCGFromJar() {
+    public static void learnIR() {
         try {
             AnalysisScope scope = AnalysisScopeReader.instance.makeJavaBinaryAnalysisScope(
                     "src/main/resources/input/JLex.jar", new File("exclusion.txt")
@@ -46,6 +47,9 @@ public class Main {
 //                            System.out.println(m);
                             IR ir = cache.getIR(m, Everywhere.EVERYWHERE);
 //                            System.out.println(ir);
+                            // wala given some special methods to visit ir
+                            ir.iterateAllInstructions(); //
+
                             for (ISSABasicBlock bb : ir.getControlFlowGraph()
                             ) {
 //                                System.out.println(bb);
@@ -53,11 +57,26 @@ public class Main {
                                 for (int i = bb.getFirstInstructionIndex(); i <= bb.getLastInstructionIndex(); i++) {
                                     SSAInstruction irElem = ir.getInstructions()[i];
                                     if (irElem != null) {
-                                        // u can see some details about addncase
-                                        System.out.println(irElem.toString(ir.getSymbolTable()));
+                                        // why some instructions is empty ???
+                                        // I can see some details about addncase
+                                        // System.out.println(irElem);
+                                        System.out.println(i + "    " + irElem.toString(ir.getSymbolTable()));
                                     }
                                 }
                             }
+                            for (Iterator<SSAInstruction> it = ir.iterateAllInstructions(); it.hasNext(); ) {
+                                SSAInstruction irElem = it.next();
+                                if (irElem != null) {
+                                    // why some instructions is empty ???
+                                    // I can see some details about addncase
+                                    // System.out.println(irElem);
+                                    //     add(c);
+                                    // invokevirtual< add(I)V> v1 v2
+                                    // non-static method v1-> this.;
+                                    System.out.println(irElem.toString(ir.getSymbolTable()));
+                                }
+                            }
+
                         }
                     }
                 }
